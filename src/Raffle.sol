@@ -1,28 +1,8 @@
-// Layout of the contract file:
-// version
-// imports
-// errors
-// interfaces, libraries, contract
-​
-// Inside Contract:
-// Type declarations
-// State variables
-// Events
-// Modifiers
-// Functions
-​
-// Layout of Functions:
-// constructor
-// receive function (if exists)
-// fallback function (if exists)
-// external
-// public
-// internal
-// private
-// view & pure functions
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
+
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 /**
  * @title A sample Raffle Contract
@@ -30,10 +10,9 @@ pragma solidity ^0.8.30;
  * @notice This contract is for creating a sample raffle
  * @dev It implements Chainlink VRFv2.5 and Chainlink Automation
  */
-contract Raffle {
-
+contract Raffle is VRFConsumerBaseV2Plus {
     error Raffle__NotEnoughEthSent();
-    error Raffle__NoPlayers()
+    error Raffle__NoPlayers();
     error Raffle__NotEnoughTimePassed();
 
     uint256 private immutable i_entranceFee;
@@ -44,10 +23,15 @@ contract Raffle {
 
     event EnteredRaffle(address indexed player);
 
-    constructor(uint256 entranceFee) {
+    constructor(
+        uint256 entranceFee,
+        uint256 interval,
+        address vrfCoordinator
+    ) VRFConsumerBaseV2Plus(vrfCoordinator) {
         i_entranceFee = entranceFee;
         i_interval = interval;
         s_lastTimeStamp = block.timestamp;
+        s_vrfCoordinator.requestRandomWords();
     }
 
     function enterRaffle() public payable {
@@ -65,10 +49,24 @@ contract Raffle {
         if (block.timestamp - s_lastTimeStamp < i_interval) {
             revert Raffle__NotEnoughTimePassed();
         }
+
+        requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: s_keyHash,
+                subId: s_subscriptionId,
+                requestConfirmations: requestConfirmations,
+                callbackGasLimit: callbackGasLimit,
+                numWords: numWords,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    // Set nativePayment to true to pay for VRF requests with Sepolia ETH instead of LINK
+                    VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
+                )
+            })
+        );
     }
 
     /* Getter functions
-    */
+     */
 
     function getEntranceFee() external view returns (uint256) {
         return i_entranceFee;
