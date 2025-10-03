@@ -2,8 +2,15 @@
 pragma solidity ^0.8.30;
 
 import {Script} from "forge-std/Script.sol";
+import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
 abstract contract CodeConstants {
+    /* VRF Mock Value */
+    uint96 public MOCK_BASE_FEE = 0.25 ether;
+    uint96 public MOCK_GAS_PRICE = 1e9;
+    //LINK / ETH price
+    int256 public MOCK_WEI_PER_UNIT_LINK = 1e18;
+
     uint256 public constant SEPOLIA_CHAIN_ID = 11155111;
     uint256 public constant LOCAL_CHAIN_ID = 31337;
 }
@@ -29,11 +36,11 @@ contract HelperConfig is CodeConstants, Script {
 
     function getConfigByChainId(
         uint256 chainId
-    ) public view returns (NetworkConfig memory) {
+    ) public returns (NetworkConfig memory) {
         if (networkConfigs[chainId].vrfCoordinator != address(0)) {
             return networkConfigs[chainId];
         } else if (chainId == LOCAL_CHAIN_ID) {
-            // getOrCreateAnvilEthConfig()
+            return getOrCreateAnvilEthConfig();
         } else {
             revert HelperConfig__ChainIdNotFound();
         }
@@ -51,12 +58,31 @@ contract HelperConfig is CodeConstants, Script {
             });
     }
 
+    function getConfig() public returns (NetworkConfig memory) {
+        return getConfigByChainId(block.chainid);
+    }
+
     function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
         if (localNetworkConfig.vrfCoordinator != address(0)) {
             return localNetworkConfig;
-        } else {
-            localNetworkConfig = getSepoliaEthConfig();
-            return localNetworkConfig;
         }
+
+        vm.startBroadcast();
+        VRFCoordinatorV2_5Mock vrfCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(
+                MOCK_BASE_FEE,
+                MOCK_GAS_PRICE,
+                MOCK_WEI_PER_UNIT_LINK
+            );
+        vm.stopBroadcast();
+
+        localNetworkConfig = NetworkConfig({
+            vrfCoordinator: address(vrfCoordinatorV2_5Mock),
+            gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
+            subscriptionId: 0,
+            entranceFee: 0.01 ether, // 1e16
+            interval: 30, // 30 seconds
+            callbackGasLimit: 500000 // 500,000 gas
+        });
+        return localNetworkConfig;
     }
 }

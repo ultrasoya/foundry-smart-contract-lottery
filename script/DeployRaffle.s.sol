@@ -3,26 +3,24 @@ pragma solidity ^0.8.30;
 
 import {Script} from "forge-std/Script.sol";
 import {Raffle} from "../src/Raffle.sol";
+import {HelperConfig} from "./HelperConfig.s.sol";
 
 contract DeployRaffle is Script {
-
     function deployContract() public returns (Raffle, HelperConfig) {
+        HelperConfig helperConfig = new HelperConfig();
+        HelperConfig.NetworkConfig memory networkConfig = helperConfig
+            .getConfig();
+
         vm.startBroadcast();
         Raffle raffle = new Raffle(
-
-        )
+            networkConfig.entranceFee,
+            networkConfig.interval,
+            networkConfig.vrfCoordinator,
+            networkConfig.gasLane,
+            networkConfig.subscriptionId,
+            networkConfig.callbackGasLimit
+        );
+        vm.stopBroadcast();
+        return (raffle, helperConfig);
     }
-    
-    // function run() public {
-    //     vm.startBroadcast();
-    //     new Raffle(
-    //         1 ether,
-    //         3600,
-    //         0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003c129,
-    //         0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003c129,
-    //         1,
-    //         500000
-    //     );
-    //     vm.stopBroadcast();
-    // }
 }
