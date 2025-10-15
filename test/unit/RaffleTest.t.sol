@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {Raffle} from "src/Raffle.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
 import {DeployRaffle} from "script/DeployRaffle.s.sol";
+import {LinkToken} from "test/mocks/LinkToken.sol";
 
 contract RaffleTest is Test {
     Raffle public raffle;
@@ -15,7 +16,8 @@ contract RaffleTest is Test {
     address vrfCoordinator;
     bytes32 gasLane;
     uint256 subscriptionId;
-    uint256 callbackGasLimit;
+    uint32 callbackGasLimit;
+    address link;
 
     address public PLAYER = makeAddr("player");
     uint256 public constant STARTING_USER_BALANCE = 10 ether;
@@ -25,15 +27,16 @@ contract RaffleTest is Test {
 
     function setUp() external {
         DeployRaffle deployRaffle = new DeployRaffle();
-        (raffle, helperConfig) = deployRaffle.deployContract();
+        (raffle, helperConfig) = deployRaffle.run();
         HelperConfig.NetworkConfig memory networkConfig = helperConfig
-            .getConfig();
+            .getConfigStruct();
         entranceFee = networkConfig.entranceFee;
         interval = networkConfig.interval;
         vrfCoordinator = networkConfig.vrfCoordinator;
         gasLane = networkConfig.gasLane;
         callbackGasLimit = networkConfig.callbackGasLimit;
         subscriptionId = networkConfig.subscriptionId;
+        link = networkConfig.link;
 
         vm.deal(PLAYER, STARTING_USER_BALANCE);
     }

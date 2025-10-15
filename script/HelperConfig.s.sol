@@ -3,6 +3,7 @@ pragma solidity ^0.8.30;
 
 import {Script} from "forge-std/Script.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+import {LinkToken} from "test/mocks/LinkToken.sol";
 
 abstract contract CodeConstants {
     /* VRF Mock Value */
@@ -25,6 +26,7 @@ contract HelperConfig is CodeConstants, Script {
         uint256 entranceFee;
         uint256 interval;
         uint32 callbackGasLimit;
+        address link;
     }
 
     NetworkConfig public localNetworkConfig;
@@ -54,12 +56,37 @@ contract HelperConfig is CodeConstants, Script {
                 subscriptionId: 0,
                 entranceFee: 0.01 ether, // 1e16
                 interval: 30, // 30 seconds
-                callbackGasLimit: 500000 // 500,000 gas
+                callbackGasLimit: 500000, // 500,000 gas
+                link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
             });
     }
 
-    function getConfig() public returns (NetworkConfig memory) {
+    function getConfigStruct() public returns (NetworkConfig memory) {
         return getConfigByChainId(block.chainid);
+    }
+
+    function getConfig()
+        public
+        returns (
+            uint256 entranceFee,
+            uint256 interval,
+            address vrfCoordinator,
+            bytes32 gasLane,
+            uint256 subscriptionId,
+            uint32 callbackGasLimit,
+            address link
+        )
+    {
+        NetworkConfig memory config = getConfigByChainId(block.chainid);
+        return (
+            config.entranceFee,
+            config.interval,
+            config.vrfCoordinator,
+            config.gasLane,
+            config.subscriptionId,
+            config.callbackGasLimit,
+            config.link
+        );
     }
 
     function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
@@ -73,6 +100,7 @@ contract HelperConfig is CodeConstants, Script {
                 MOCK_GAS_PRICE,
                 MOCK_WEI_PER_UNIT_LINK
             );
+        LinkToken linkToken = new LinkToken();
         vm.stopBroadcast();
 
         localNetworkConfig = NetworkConfig({
@@ -81,7 +109,8 @@ contract HelperConfig is CodeConstants, Script {
             subscriptionId: 0,
             entranceFee: 0.01 ether, // 1e16
             interval: 30, // 30 seconds
-            callbackGasLimit: 500000 // 500,000 gas
+            callbackGasLimit: 500000, // 500,000 gas
+            link: address(linkToken)
         });
         return localNetworkConfig;
     }
