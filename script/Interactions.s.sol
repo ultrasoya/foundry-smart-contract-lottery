@@ -42,7 +42,7 @@ contract FundSubscription is Script, CodeConstants {
         fundSubscription(
             config.vrfCoordinator,
             config.subscriptionId,
-            config.link
+            config.linkToken
         );
     }
 

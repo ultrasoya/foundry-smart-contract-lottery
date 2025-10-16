@@ -26,7 +26,7 @@ contract HelperConfig is CodeConstants, Script {
         uint256 entranceFee;
         uint256 interval;
         uint32 callbackGasLimit;
-        address link;
+        address linkToken;
     }
 
     NetworkConfig public localNetworkConfig;
@@ -57,7 +57,7 @@ contract HelperConfig is CodeConstants, Script {
                 entranceFee: 0.01 ether, // 1e16
                 interval: 30, // 30 seconds
                 callbackGasLimit: 500000, // 500,000 gas
-                link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
+                linkToken: 0x779877A7B0D9E8603169DdbD7836e478b4624789
             });
     }
 
@@ -74,7 +74,7 @@ contract HelperConfig is CodeConstants, Script {
             bytes32 gasLane,
             uint256 subscriptionId,
             uint32 callbackGasLimit,
-            address link
+            address linkToken
         )
     {
         NetworkConfig memory config = getConfigByChainId(block.chainid);
@@ -85,7 +85,7 @@ contract HelperConfig is CodeConstants, Script {
             config.gasLane,
             config.subscriptionId,
             config.callbackGasLimit,
-            config.link
+            config.linkToken
         );
     }
 
@@ -109,8 +109,8 @@ contract HelperConfig is CodeConstants, Script {
             subscriptionId: 0,
             entranceFee: 0.01 ether, // 1e16
             interval: 30, // 30 seconds
-            callbackGasLimit: 500000, // 500,000 gas
-            link: address(linkToken)
+            callbackGasLimit: 500_000, // 500,000 gas
+            linkToken: address(linkToken)
         });
         return localNetworkConfig;
     }
