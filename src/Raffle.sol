@@ -36,12 +36,12 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
     event EnteredRaffle(address indexed player);
     event WinnerPicked(address indexed winner);
+    event RequestedRaffleWinner(uint256 indexed requestId);
 
     error Raffle__TransferFailed();
     error Raffle__RaffleNotOpen();
     error Raffle__UpkeepNotNeeded(
         RaffleState raffleState,
-        uint256 timestamp,
         uint256 playersLength,
         uint256 balance
     );
@@ -101,7 +101,6 @@ contract Raffle is VRFConsumerBaseV2Plus {
         if (!upkeepNeeded) {
             revert Raffle__UpkeepNotNeeded(
                 s_raffleState,
-                block.timestamp,
                 s_players.length,
                 address(this).balance
             );
@@ -121,7 +120,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
                     VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
                 )
             });
-        s_vrfCoordinator.requestRandomWords(request);
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(request);
+
+        emit RequestedRaffleWinner(requestId);
     }
 
     /* Getter functions
