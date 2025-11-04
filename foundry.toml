@@ -9,3 +9,8 @@ remappings = [
 ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[rpc_endpoints]
+# Используйте переменную окружения из .env файла
+# НЕ коммитьте .env файл в репозиторий - он уже в .gitignore
+sepolia = "${SEPOLIA_RPC_URL}"
