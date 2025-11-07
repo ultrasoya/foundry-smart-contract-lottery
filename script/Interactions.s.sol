@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
+pragma solidity ^0.8.19;
 
 import {Script, console} from "forge-std/Script.sol";
 import {HelperConfig, CodeConstants} from "./HelperConfig.s.sol";
-import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+import {VRFCoordinatorV2PlusMock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2PlusMock.sol";
 import {LinkToken} from "test/mocks/LinkToken.sol";
 import {DevOpsTools} from "lib/foundry-devops/src/DevOpsTools.sol";
 
@@ -19,7 +19,7 @@ contract CreateSubscription is Script {
     ) public returns (uint256) {
         console.log("Create subscription on ChainId:", block.chainid);
         vm.startBroadcast();
-        uint256 subId = VRFCoordinatorV2_5Mock(vrfCoordinator)
+        uint256 subId = VRFCoordinatorV2PlusMock(vrfCoordinator)
             .createSubscription();
         vm.stopBroadcast();
         console.log("Your sub Id is: ", subId);
@@ -57,9 +57,9 @@ contract FundSubscription is Script, CodeConstants {
 
         if (block.chainid == LOCAL_CHAIN_ID) {
             vm.startBroadcast();
-            VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(
+            VRFCoordinatorV2PlusMock(vrfCoordinator).fundSubscription(
                 subId,
-                FUND_AMOUNT
+                uint96(FUND_AMOUNT)
             );
             vm.stopBroadcast();
         } else {
@@ -93,7 +93,7 @@ contract AddConsumer is Script {
         console.log("On chain id: ", block.chainid);
 
         vm.startBroadcast();
-        VRFCoordinatorV2_5Mock(vrfCoordinator).addConsumer(subId, raffle);
+        VRFCoordinatorV2PlusMock(vrfCoordinator).addConsumer(subId, raffle);
         vm.stopBroadcast();
     }
 

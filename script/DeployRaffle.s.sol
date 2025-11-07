@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
+pragma solidity ^0.8.19;
 
 import {Script} from "forge-std/Script.sol";
 import {Raffle} from "../src/Raffle.sol";
@@ -35,12 +35,12 @@ contract DeployRaffle is Script {
 
         vm.startBroadcast();
         Raffle raffle = new Raffle(
-            subscriptionId,
-            gasLane,
-            interval,
             entranceFee,
-            callbackGasLimit,
-            vrfCoordinator
+            interval,
+            vrfCoordinator,
+            gasLane,
+            subscriptionId,
+            callbackGasLimit
         );
         vm.stopBroadcast();
 

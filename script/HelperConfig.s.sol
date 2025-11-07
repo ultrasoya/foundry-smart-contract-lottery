@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.30;
+pragma solidity ^0.8.19;
 
 import {Script} from "forge-std/Script.sol";
-import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+import {
+    VRFCoordinatorV2PlusMock
+} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2PlusMock.sol";
 import {LinkToken} from "test/mocks/LinkToken.sol";
 
 abstract contract CodeConstants {
@@ -53,7 +55,7 @@ contract HelperConfig is CodeConstants, Script {
             NetworkConfig({
                 vrfCoordinator: 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B,
                 gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
-                subscriptionId: 0,
+                subscriptionId: 30697500581268310930576647295634369026000675822518481153932769994560102167462,
                 entranceFee: 0.01 ether, // 1e16
                 interval: 30, // 30 seconds
                 callbackGasLimit: 500000, // 500,000 gas
@@ -95,10 +97,9 @@ contract HelperConfig is CodeConstants, Script {
         }
 
         vm.startBroadcast();
-        VRFCoordinatorV2_5Mock vrfCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(
+        VRFCoordinatorV2PlusMock vrfCoordinatorV2_5Mock = new VRFCoordinatorV2PlusMock(
                 MOCK_BASE_FEE,
-                MOCK_GAS_PRICE,
-                MOCK_WEI_PER_UNIT_LINK
+                MOCK_GAS_PRICE
             );
         LinkToken linkToken = new LinkToken();
         vm.stopBroadcast();
